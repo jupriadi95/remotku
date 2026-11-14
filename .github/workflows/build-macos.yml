@@ -1,0 +1,55 @@
+name: Build macOS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-macos-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - run: flutter analyze
+
+      - run: flutter test
+
+      - name: Build macOS (release)
+        run: flutter build macos --release
+
+      - name: Zip .app
+        run: |
+          cd build/macos/Build/Products/Release
+          ditto -c -k --sequesterRsrc --keepParent remote_ku.app "$GITHUB_WORKSPACE/RemoteKu-macos.zip"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RemoteKu-macos
+          path: RemoteKu-macos.zip
+          retention-days: 30
+
+      # Release dengan tag tetap "latest" selalu ditimpa, sehingga URL download tidak berubah.
+      - name: Publish to fixed "latest" release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --cleanup-tag --yes || true
+          gh release create latest RemoteKu-macos.zip \
+            --target "$GITHUB_SHA" \
+            --title "RemoteKu (latest)" \
+            --notes "Build otomatis dari commit $GITHUB_SHA (run #$GITHUB_RUN_NUMBER)"
