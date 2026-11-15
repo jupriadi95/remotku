@@ -22,6 +22,7 @@ class _ConnectPageState extends State<ConnectPage> {
   final _keyPath = TextEditingController();
   final _passphrase = TextEditingController();
   bool _usePublicKey = false;
+  bool _useCloudflare = false;
   bool _obscure = true;
 
   @override
@@ -36,6 +37,7 @@ class _ConnectPageState extends State<ConnectPage> {
         _port.text = p.port.toString();
         _user.text = p.username;
         _usePublicKey = p.usePublicKey;
+        _useCloudflare = p.useCloudflare;
         _keyPath.text = p.privateKeyPath ?? '';
       });
     });
@@ -66,6 +68,7 @@ class _ConnectPageState extends State<ConnectPage> {
       usePublicKey: _usePublicKey,
       privateKeyPath: _keyPath.text.trim(),
       passphrase: _passphrase.text,
+      useCloudflare: _useCloudflare,
     ));
     if (!mounted) return;
     if (ok) {
@@ -167,6 +170,13 @@ class _ConnectPageState extends State<ConnectPage> {
                     validator: _required,
                   ),
                   const SizedBox(height: 8),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Lewat Cloudflare Tunnel'),
+                    subtitle: const Text('Butuh cloudflared terpasang (brew install cloudflared)'),
+                    value: _useCloudflare,
+                    onChanged: (v) => setState(() => _useCloudflare = v),
+                  ),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     title: const Text('Gunakan public key'),

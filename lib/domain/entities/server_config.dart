@@ -7,6 +7,7 @@ class ServerConfig {
   final bool usePublicKey;
   final String? privateKeyPath;
   final String? passphrase;
+  final bool useCloudflare;
 
   const ServerConfig({
     required this.host,
@@ -16,6 +17,7 @@ class ServerConfig {
     this.usePublicKey = false,
     this.privateKeyPath,
     this.passphrase,
+    this.useCloudflare = false,
   });
 
   Map<String, dynamic> toStorageJson() => {
@@ -24,6 +26,7 @@ class ServerConfig {
         'username': username,
         'usePublicKey': usePublicKey,
         'privateKeyPath': privateKeyPath,
+        'useCloudflare': useCloudflare,
       };
 
   factory ServerConfig.fromStorageJson(Map<String, dynamic> json) =>
@@ -33,5 +36,6 @@ class ServerConfig {
         username: json['username'] as String? ?? '',
         usePublicKey: json['usePublicKey'] as bool? ?? false,
         privateKeyPath: json['privateKeyPath'] as String?,
+        useCloudflare: json['useCloudflare'] as bool? ?? false,
       );
 }

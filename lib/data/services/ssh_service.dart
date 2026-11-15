@@ -6,6 +6,7 @@ import 'package:dartssh2/dartssh2.dart';
 
 import '../../domain/entities/server_config.dart';
 import '../../domain/repositories.dart';
+import 'cloudflared_socket.dart';
 
 class DartSshGateway implements SshGateway {
   SSHClient? _client;
@@ -20,8 +21,10 @@ class DartSshGateway implements SshGateway {
   @override
   Future<void> connect(ServerConfig c) async {
     await disconnect();
-    final socket = await SSHSocket.connect(c.host, c.port,
-        timeout: const Duration(seconds: 15));
+    final SSHSocket socket = c.useCloudflare
+        ? await ProcessSshSocket.cloudflared(c.host)
+        : await SSHSocket.connect(c.host, c.port,
+            timeout: const Duration(seconds: 15));
 
     List<SSHKeyPair>? identities;
     if (c.usePublicKey) {
